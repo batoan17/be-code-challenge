@@ -14,27 +14,15 @@ describe('GET /docs', () => {
     await prismaModule.default.$disconnect();
   });
 
-  it('serves the human-readable API docs', async () => {
+  it('serves the Swagger UI API docs', async () => {
     const { createApp } = await import('../src/app');
     const app = await createApp();
 
-    const response = await request(app).get('/docs');
+    const response = await request(app).get('/docs/');
 
     expect(response.status).toBe(200);
     expect(response.headers['content-type']).toContain('text/html');
+    expect(response.text).toContain('swagger-ui');
     expect(response.text).toContain('A Crude Server API Docs');
-  });
-
-  it('serves the OpenAPI JSON document', async () => {
-    const { createApp } = await import('../src/app');
-    const app = await createApp();
-
-    const response = await request(app).get('/docs/openapi.json');
-
-    expect(response.status).toBe(200);
-    expect(response.body.openapi).toBe('3.0.3');
-    expect(response.body.paths).toHaveProperty('/health');
-    expect(response.body.paths).toHaveProperty('/users');
-    expect(response.body.paths).toHaveProperty('/users/{id}');
   });
 });

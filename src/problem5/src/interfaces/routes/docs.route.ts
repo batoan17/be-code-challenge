@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import swaggerUi from 'swagger-ui-express';
 
 export const docsRouter = Router();
 
@@ -12,12 +13,12 @@ const userResponse = {
     },
     name: {
       type: 'string',
-      example: 'Ada Lovelace',
+      example: 'John Doe',
     },
     email: {
       type: 'string',
       format: 'email',
-      example: 'ada@example.com',
+      example: 'john@example.com',
     },
     createdAt: {
       type: 'string',
@@ -38,13 +39,13 @@ const userWriteBody = {
       type: 'string',
       minLength: 1,
       maxLength: 100,
-      example: 'Ada Lovelace',
+      example: 'John Doe',
     },
     email: {
       type: 'string',
       format: 'email',
       maxLength: 254,
-      example: 'ada@example.com',
+      example: 'john@example.com',
     },
   },
 } as const;
@@ -360,174 +361,12 @@ export const openApiDocument = {
   },
 } as const;
 
-const docsHtml = `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>A Crude Server API Docs</title>
-    <style>
-      :root {
-        color-scheme: light;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        color: #1f2933;
-        background: #f6f8fa;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-      }
-
-      header {
-        border-bottom: 1px solid #d9e2ec;
-        background: #ffffff;
-        padding: 32px max(24px, calc((100vw - 1040px) / 2));
-      }
-
-      main {
-        max-width: 1040px;
-        margin: 0 auto;
-        padding: 28px 24px 48px;
-      }
-
-      h1 {
-        margin: 0 0 8px;
-        font-size: 32px;
-        line-height: 1.15;
-      }
-
-      h2 {
-        margin: 32px 0 12px;
-        font-size: 22px;
-      }
-
-      h3 {
-        margin: 0;
-        font-size: 18px;
-      }
-
-      p {
-        margin: 0;
-        color: #52616b;
-      }
-
-      a {
-        color: #0b63ce;
-      }
-
-      .endpoint {
-        display: grid;
-        gap: 12px;
-        margin: 14px 0;
-        padding: 18px;
-        border: 1px solid #d9e2ec;
-        border-radius: 8px;
-        background: #ffffff;
-      }
-
-      .endpoint-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-
-      .method {
-        min-width: 64px;
-        border-radius: 999px;
-        padding: 4px 10px;
-        text-align: center;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0;
-        color: #ffffff;
-        background: #136f63;
-      }
-
-      .method.post {
-        background: #9f580a;
-      }
-
-      .method.patch {
-        background: #7347a6;
-      }
-
-      .method.delete {
-        background: #a12828;
-      }
-
-      code {
-        border-radius: 6px;
-        background: #eef2f7;
-        padding: 3px 6px;
-        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-        font-size: 0.95em;
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>A Crude Server API Docs</h1>
-      <p>OpenAPI JSON is available at <a href="/docs/openapi.json">/docs/openapi.json</a>.</p>
-    </header>
-    <main>
-      <h2>Health</h2>
-      <section class="endpoint">
-        <div class="endpoint-title">
-          <span class="method">GET</span>
-          <h3><code>/health</code></h3>
-        </div>
-        <p>Checks service and database health.</p>
-      </section>
-
-      <h2>Users</h2>
-      <section class="endpoint">
-        <div class="endpoint-title">
-          <span class="method">GET</span>
-          <h3><code>/users?name=&amp;email=</code></h3>
-        </div>
-        <p>Lists users with optional name and email filters.</p>
-      </section>
-      <section class="endpoint">
-        <div class="endpoint-title">
-          <span class="method post">POST</span>
-          <h3><code>/users</code></h3>
-        </div>
-        <p>Creates a user from a name and unique email address.</p>
-      </section>
-      <section class="endpoint">
-        <div class="endpoint-title">
-          <span class="method">GET</span>
-          <h3><code>/users/:id</code></h3>
-        </div>
-        <p>Returns one user by MongoDB ObjectId.</p>
-      </section>
-      <section class="endpoint">
-        <div class="endpoint-title">
-          <span class="method patch">PATCH</span>
-          <h3><code>/users/:id</code></h3>
-        </div>
-        <p>Updates a user's name, email, or both.</p>
-      </section>
-      <section class="endpoint">
-        <div class="endpoint-title">
-          <span class="method delete">DELETE</span>
-          <h3><code>/users/:id</code></h3>
-        </div>
-        <p>Deletes a user.</p>
-      </section>
-    </main>
-  </body>
-</html>`;
-
-docsRouter.get('/', (_request, response) => {
-  response.type('html').send(docsHtml);
-});
-
 docsRouter.get('/openapi.json', (_request, response) => {
   response.json(openApiDocument);
 });
+
+const swaggerUiHandler = swaggerUi.setup(openApiDocument, {
+  customSiteTitle: 'A Crude Server API Docs',
+});
+
+docsRouter.use('/', swaggerUi.serve, swaggerUiHandler);
