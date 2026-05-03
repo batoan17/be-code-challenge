@@ -59,8 +59,8 @@ export const openApiDocument = {
   },
   servers: [
     {
-      url: 'http://localhost:3000',
-      description: 'Local development server',
+      url: '/',
+      description: 'Current deployment origin',
     },
   ],
   tags: [
@@ -367,6 +367,9 @@ docsRouter.get('/openapi.json', (_request, response) => {
 
 const swaggerUiHandler = swaggerUi.setup(openApiDocument, {
   customSiteTitle: 'A Crude Server API Docs',
+  swaggerOptions: {
+    url: '/docs/openapi.json',
+  },
 });
 
 docsRouter.use('/', swaggerUi.serve, swaggerUiHandler);
