@@ -6,8 +6,7 @@ describe('GET /health', () => {
     vi.resetModules();
     process.env.NODE_ENV = 'test';
     process.env.PORT = '3000';
-    process.env.DATABASE_URL =
-      'mysql://root:root@localhost:3306/my_node_server';
+    process.env.DATABASE_URL = 'mongodb://localhost:27017/crude_server_test';
   });
 
   afterEach(async () => {

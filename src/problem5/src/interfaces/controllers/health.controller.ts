@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-
-import { checkHealth } from '../../usecases/check-health';
+import { healthUseCases } from '../../usecases';
 
 export async function getHealth(
   _request: Request,
@@ -8,7 +7,7 @@ export async function getHealth(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const result = await checkHealth();
+    const result = await healthUseCases.checkHealth();
     response.status(result.statusCode).json(result.body);
   } catch (error) {
     next(error);

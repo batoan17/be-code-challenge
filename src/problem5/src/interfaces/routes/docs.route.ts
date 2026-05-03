@@ -2,6 +2,53 @@ import { Router } from 'express';
 
 export const docsRouter = Router();
 
+const userResponse = {
+  type: 'object',
+  required: ['id', 'name', 'email', 'createdAt', 'updatedAt'],
+  properties: {
+    id: {
+      type: 'string',
+      example: '6560f7f60d3f5b8f3d5c5d11',
+    },
+    name: {
+      type: 'string',
+      example: 'Ada Lovelace',
+    },
+    email: {
+      type: 'string',
+      format: 'email',
+      example: 'ada@example.com',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+    },
+  },
+} as const;
+
+const userWriteBody = {
+  type: 'object',
+  required: ['name', 'email'],
+  properties: {
+    name: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+      example: 'Ada Lovelace',
+    },
+    email: {
+      type: 'string',
+      format: 'email',
+      maxLength: 254,
+      example: 'ada@example.com',
+    },
+  },
+} as const;
+
 export const openApiDocument = {
   openapi: '3.0.3',
   info: {
@@ -19,6 +66,10 @@ export const openApiDocument = {
     {
       name: 'Health',
       description: 'Service health checks',
+    },
+    {
+      name: 'Users',
+      description: 'User resource CRUD operations',
     },
   ],
   paths: {
@@ -50,9 +101,214 @@ export const openApiDocument = {
         },
       },
     },
+    '/users': {
+      get: {
+        tags: ['Users'],
+        summary: 'List users',
+        parameters: [
+          {
+            in: 'query',
+            name: 'name',
+            schema: { type: 'string' },
+            required: false,
+          },
+          {
+            in: 'query',
+            name: 'email',
+            schema: { type: 'string' },
+            required: false,
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Users matching the provided filters',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UserListResponse',
+                },
+              },
+            },
+          },
+          '400': {
+            $ref: '#/components/responses/ValidationError',
+          },
+        },
+      },
+      post: {
+        tags: ['Users'],
+        summary: 'Create a user',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/CreateUserRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'User created',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UserResponse',
+                },
+              },
+            },
+          },
+          '400': {
+            $ref: '#/components/responses/ValidationError',
+          },
+          '409': {
+            $ref: '#/components/responses/ErrorResponse',
+          },
+        },
+      },
+    },
+    '/users/{id}': {
+      get: {
+        tags: ['Users'],
+        summary: 'Get a user',
+        parameters: [{ $ref: '#/components/parameters/UserId' }],
+        responses: {
+          '200': {
+            description: 'User details',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UserResponse',
+                },
+              },
+            },
+          },
+          '400': {
+            $ref: '#/components/responses/ValidationError',
+          },
+          '404': {
+            $ref: '#/components/responses/ErrorResponse',
+          },
+        },
+      },
+      patch: {
+        tags: ['Users'],
+        summary: 'Update a user',
+        parameters: [{ $ref: '#/components/parameters/UserId' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/UpdateUserRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'User updated',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UserResponse',
+                },
+              },
+            },
+          },
+          '400': {
+            $ref: '#/components/responses/ValidationError',
+          },
+          '404': {
+            $ref: '#/components/responses/ErrorResponse',
+          },
+          '409': {
+            $ref: '#/components/responses/ErrorResponse',
+          },
+        },
+      },
+      delete: {
+        tags: ['Users'],
+        summary: 'Delete a user',
+        parameters: [{ $ref: '#/components/parameters/UserId' }],
+        responses: {
+          '204': {
+            description: 'User deleted',
+          },
+          '400': {
+            $ref: '#/components/responses/ValidationError',
+          },
+          '404': {
+            $ref: '#/components/responses/ErrorResponse',
+          },
+        },
+      },
+    },
   },
   components: {
+    parameters: {
+      UserId: {
+        in: 'path',
+        name: 'id',
+        required: true,
+        schema: {
+          type: 'string',
+          pattern: '^[a-fA-F0-9]{24}$',
+        },
+      },
+    },
+    responses: {
+      ErrorResponse: {
+        description: 'Request failed',
+        content: {
+          'application/json': {
+            schema: {
+              $ref: '#/components/schemas/ErrorResponse',
+            },
+          },
+        },
+      },
+      ValidationError: {
+        description: 'Validation failed',
+        content: {
+          'application/json': {
+            schema: {
+              $ref: '#/components/schemas/ValidationError',
+            },
+          },
+        },
+      },
+    },
     schemas: {
+      User: userResponse,
+      CreateUserRequest: userWriteBody,
+      UpdateUserRequest: {
+        type: 'object',
+        minProperties: 1,
+        properties: userWriteBody.properties,
+      },
+      UserResponse: {
+        type: 'object',
+        required: ['data'],
+        properties: {
+          data: {
+            $ref: '#/components/schemas/User',
+          },
+        },
+      },
+      UserListResponse: {
+        type: 'object',
+        required: ['data'],
+        properties: {
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/User',
+            },
+          },
+        },
+      },
       HealthReport: {
         type: 'object',
         required: ['status', 'service', 'database', 'timestamp', 'uptime'],
@@ -104,7 +360,7 @@ export const openApiDocument = {
   },
 } as const;
 
-export const docsHtml = `<!doctype html>
+const docsHtml = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -196,27 +452,20 @@ export const docsHtml = `<!doctype html>
         background: #9f580a;
       }
 
+      .method.patch {
+        background: #7347a6;
+      }
+
+      .method.delete {
+        background: #a12828;
+      }
+
       code {
         border-radius: 6px;
         background: #eef2f7;
         padding: 3px 6px;
         font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
         font-size: 0.95em;
-      }
-
-      pre {
-        overflow-x: auto;
-        margin: 0;
-        border-radius: 8px;
-        background: #17202a;
-        color: #f8fafc;
-        padding: 14px;
-      }
-
-      pre code {
-        background: transparent;
-        color: inherit;
-        padding: 0;
       }
     </style>
   </head>
@@ -233,6 +482,43 @@ export const docsHtml = `<!doctype html>
           <h3><code>/health</code></h3>
         </div>
         <p>Checks service and database health.</p>
+      </section>
+
+      <h2>Users</h2>
+      <section class="endpoint">
+        <div class="endpoint-title">
+          <span class="method">GET</span>
+          <h3><code>/users?name=&amp;email=</code></h3>
+        </div>
+        <p>Lists users with optional name and email filters.</p>
+      </section>
+      <section class="endpoint">
+        <div class="endpoint-title">
+          <span class="method post">POST</span>
+          <h3><code>/users</code></h3>
+        </div>
+        <p>Creates a user from a name and unique email address.</p>
+      </section>
+      <section class="endpoint">
+        <div class="endpoint-title">
+          <span class="method">GET</span>
+          <h3><code>/users/:id</code></h3>
+        </div>
+        <p>Returns one user by MongoDB ObjectId.</p>
+      </section>
+      <section class="endpoint">
+        <div class="endpoint-title">
+          <span class="method patch">PATCH</span>
+          <h3><code>/users/:id</code></h3>
+        </div>
+        <p>Updates a user's name, email, or both.</p>
+      </section>
+      <section class="endpoint">
+        <div class="endpoint-title">
+          <span class="method delete">DELETE</span>
+          <h3><code>/users/:id</code></h3>
+        </div>
+        <p>Deletes a user.</p>
       </section>
     </main>
   </body>

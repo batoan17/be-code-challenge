@@ -7,7 +7,7 @@ import morgan from 'morgan';
 
 import { env } from './config/env';
 import logger from './config/logger';
-import { docsRouter, healthRouter } from './interfaces/index';
+import { docsRouter, healthRouter, userRouter } from './interfaces/index';
 import { errorMiddleware } from './shared/error-middleware';
 
 export async function createApp() {
@@ -41,6 +41,7 @@ export async function createApp() {
 
   app.use('/docs', docsRouter);
   app.use('/health', healthRouter);
+  app.use('/users', userRouter);
 
   app.use(errorMiddleware);
 

@@ -15,7 +15,10 @@
     "pages:build": "npm run build && node scripts/build-pages.mjs",
     "prepush": "npm run lint",
     "prepare": "husky",
+    "db:init": "npm run prisma:db:push && npm run seed",
+    "seed": "ts-node prisma/seed.ts",
     "prisma:generate": "prisma generate",
+    "prisma:db:push": "prisma db push",
     "prisma:migrate:dev": "prisma migrate dev"
   },
   "dependencies": {

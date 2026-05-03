@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 
 import logger from '../config/logger';
+import { HttpError } from './http-error';
 
 export function errorMiddleware(
   error: unknown,
@@ -13,6 +14,13 @@ export function errorMiddleware(
     response.status(400).json({
       message: 'Validation failed',
       issues: error.flatten(),
+    });
+    return;
+  }
+
+  if (error instanceof HttpError) {
+    response.status(error.statusCode).json({
+      message: error.message,
     });
     return;
   }

@@ -6,7 +6,7 @@ describe('GET /docs', () => {
     vi.resetModules();
     process.env.NODE_ENV = 'test';
     process.env.PORT = '3000';
-    process.env.DATABASE_URL = 'mysql://root:root@localhost:3306/test_db';
+    process.env.DATABASE_URL = 'mongodb://localhost:27017/crude_server_test';
   });
 
   afterEach(async () => {
@@ -34,5 +34,7 @@ describe('GET /docs', () => {
     expect(response.status).toBe(200);
     expect(response.body.openapi).toBe('3.0.3');
     expect(response.body.paths).toHaveProperty('/health');
+    expect(response.body.paths).toHaveProperty('/users');
+    expect(response.body.paths).toHaveProperty('/users/{id}');
   });
 });
