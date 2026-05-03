@@ -1,11 +1,10 @@
-import { createApp } from './app';
+import app from './app';
 import { env } from './config/env';
 import logger from './config/logger';
 import prisma from './infrastructure/prisma/prisma';
 import { CleanupTask, setupGracefulShutdown } from './shared/graceful-shutdown';
 
 async function bootstrap(): Promise<void> {
-  const app = await createApp();
   const server = app.listen(env.PORT, () => {
     logger.info(`Node.js server listening on port ${env.PORT}`);
   });

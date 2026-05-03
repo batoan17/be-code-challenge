@@ -10,7 +10,7 @@ import logger from './config/logger';
 import { docsRouter, healthRouter, userRouter } from './interfaces/index';
 import { errorMiddleware } from './shared/error-middleware';
 
-export async function createApp() {
+export function createApp() {
   const app = express();
 
   app.use(helmet());
@@ -47,3 +47,5 @@ export async function createApp() {
 
   return app;
 }
+
+export default createApp();
