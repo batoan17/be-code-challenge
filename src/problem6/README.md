@@ -198,6 +198,20 @@ Cache rebuild strategy:
 - For large systems, rebuild asynchronously in batches.
 - Add metrics for Redis failures, cache rebuild duration, and leaderboard read latency.
 
+## Scaling the API Solution
+
+The API should be designed as stateless application instances behind a load balancer. Any instance can accept `POST /score-events`, read leaderboard data, or host WebSocket connections because shared state lives in the database and Redis.
+
+Recommended scaling approach:
+
+| Layer | Scaling strategy |
+| --- | --- |
+| API servers | Run multiple stateless instances behind a load balancer. Scale horizontally based on request rate, latency, and WebSocket connection count. |
+| Database | Keep score updates transactional, index `users.score` and `score_events.completion_id`, and use read replicas for non-critical leaderboard fallback reads. |
+| Redis | Use Redis sorted sets for low-latency leaderboard reads and Redis pub/sub for update fanout across API instances. |
+| WebSocket gateway | Allow each API instance to maintain local client connections. Broadcast cross-instance updates through Redis pub/sub so every connected client receives the same leaderboard event. |
+| Rate limiting | Store rate-limit counters in Redis so limits remain consistent across horizontally scaled API instances. |
+
 ## Authentication and Authorization
 
 Use JWT bearer authentication for score-changing endpoints.
