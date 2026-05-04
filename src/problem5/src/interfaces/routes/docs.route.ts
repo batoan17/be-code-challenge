@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import swaggerUi from 'swagger-ui-express';
 
+import { env } from '../../config/env';
+
 export const docsRouter = Router();
 
 const userResponse = {
@@ -61,6 +63,11 @@ export const openApiDocument = {
     {
       url: '/',
       description: 'Current deployment origin',
+    },
+  ],
+  security: [
+    {
+      ApiKeyAuth: [],
     },
   ],
   tags: [
@@ -248,6 +255,14 @@ export const openApiDocument = {
     },
   },
   components: {
+    securitySchemes: {
+      ApiKeyAuth: {
+        type: 'apiKey',
+        in: 'header',
+        name: 'x-api-key',
+        description: 'API key required to call protected endpoints.',
+      },
+    },
     parameters: {
       UserId: {
         in: 'path',
@@ -369,6 +384,11 @@ const swaggerUiHandler = swaggerUi.setup(openApiDocument, {
   customSiteTitle: 'A Crude Server API Docs',
   swaggerOptions: {
     url: '/docs/openapi.json',
+    persistAuthorization: true,
+    preauthorizeApiKey: {
+      authDefinitionKey: 'ApiKeyAuth',
+      apiKeyValue: env.API_KEY,
+    },
   },
 });
 

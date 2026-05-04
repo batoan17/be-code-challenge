@@ -40,8 +40,11 @@ Create or update `.env` with:
 NODE_ENV=development
 PORT=3000
 CORS_ORIGIN=*
+API_KEY=
 DATABASE_URL="mongodb+srv://<user>:<password>@<cluster>/<database>?retryWrites=true&w=majority"
 ```
+
+All runtime API endpoints require the key in the `x-api-key` header. Swagger UI is pre-authorized from `API_KEY`, so requests sent from `/docs` include the header by default.
 
 Install dependencies:
 

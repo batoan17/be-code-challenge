@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import { env } from './config/env';
 import logger from './config/logger';
 import { docsRouter, healthRouter, userRouter } from './interfaces/index';
+import { apiKeyAuthMiddleware } from './shared/api-key-auth-middleware';
 import { errorMiddleware } from './shared/error-middleware';
 
 export function createApp() {
@@ -40,6 +41,7 @@ export function createApp() {
   );
 
   app.use('/docs', docsRouter);
+  app.use(apiKeyAuthMiddleware);
   app.use('/health', healthRouter);
   app.use('/users', userRouter);
 
